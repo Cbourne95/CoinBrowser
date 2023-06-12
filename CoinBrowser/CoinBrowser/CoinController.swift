@@ -20,5 +20,27 @@ class CoinController {
         let finalURL = coinsURL.appending(path: keyListComponent)
         print(finalURL)
 
+        URLSession.shared.dataTask(with: finalURL) { coinData, _, error in
+            if let error = error {
+                print("there was an error: \(error.localizedDescription)")
+        }
+            guard let data = coinData else {
+                return ; completion(false)
+            }
+            do{
+                if let toplevelArrayOfCoinDictionaries = try JSONSerialization.jsonObject(with: data) as? [[String : String]]{
+                    for coinDictionary in toplevelArrayOfCoinDictionaries{
+                        if let coin = Coin(dictionary: coinDictionary){
+                            coins.append(coin)
+                        }
+                    }
+                }
+                completion(true)
+            } catch {
+                completion(false)
+            }
+        }.resume()
     }
 }
+
+
